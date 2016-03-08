@@ -169,6 +169,11 @@ func (md *MetaData) unify(data interface{}, rv reflect.Value) error {
 		return md.unifyDatetime(data, rv)
 	}
 
+	var zd time.Duration
+	if rv.Type().AssignableTo(rvalue(zd).Type()) {
+		return md.unifyDuration(data, rv)
+	}
+
 	// Special case. Look for a value satisfying the TextUnmarshaler interface.
 	if v, ok := rv.Interface().(TextUnmarshaler); ok {
 		return md.unifyText(data, v)
@@ -330,6 +335,18 @@ func (md *MetaData) unifySliceArray(data, rv reflect.Value) error {
 func (md *MetaData) unifyDatetime(data interface{}, rv reflect.Value) error {
 	if _, ok := data.(time.Time); ok {
 		rv.Set(reflect.ValueOf(data))
+		return nil
+	}
+	return badtype("time.Time", data)
+}
+
+func (md *MetaData) unifyDuration(data interface{}, rv reflect.Value) error {
+	if s, ok := data.(string); ok {
+		dur, err := time.ParseDuration(s)
+		if err != nil {
+			return badtype("time.Duration", data)
+		}
+		rv.Set(reflect.ValueOf(dur))
 		return nil
 	}
 	return badtype("time.Time", data)
