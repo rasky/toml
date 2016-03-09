@@ -218,9 +218,6 @@ func (md *MetaData) unify(data interface{}, rv reflect.Value) error {
 		if rv.NumMethod() > 0 {
 			return e("Unsupported type '%s'.", rv.Kind())
 		}
-		if rv.Elem().Kind() == reflect.Ptr && rv.Elem().Elem().Kind() == reflect.Struct {
-			return md.unifyStruct(data, rv.Elem().Elem())
-		}
 		return md.unifyAnything(data, rv)
 	case reflect.Float32:
 		fallthrough
